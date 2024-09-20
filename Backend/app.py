@@ -11,11 +11,15 @@ CORS(app)
 
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
-df = pd.read_csv('ipc_sections_cleaned.csv')
+df = pd.read_csv('ipc_sections1.csv')
 
 legal_data = df.to_dict(orient='records')
 
-legal_embeddings = [model.encode(doc['content']) for doc in legal_data]
+# legal_embeddings = [model.encode(doc['content']) for doc in legal_data]
+legal_embeddings = [
+    model.encode(str(doc['content'])) for doc in legal_data if isinstance(doc['content'], (str, bytes))
+]
+
 
 embeddings_matrix = np.array(legal_embeddings)
 
