@@ -1,6 +1,0 @@
-pandas
-numpy
-faiss
-flask
-cors
-sentence-transformer
