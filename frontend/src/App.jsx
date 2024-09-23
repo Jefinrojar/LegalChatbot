@@ -53,7 +53,7 @@ const App = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-100 mt-3 py-2 px-4 btn btn-primary text-white rounded shadow-md ${loading ? 'bg-secondary disabled' : 'btn-primary'}`}
+          className={`w-100 mt-3 py-2 px-4 btn btn-primary text-white rounded shadow-md ${loading ? 'bg-secondary disabled border' : 'btn-primary'}`}
         >
           {loading ? 'Fetching...' : 'Submit'}
         </button>
