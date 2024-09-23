@@ -14,6 +14,10 @@ const App = () => {
     setUserInput(e.target.value);
   };
 
+  const handlePromptClick = (e) => {
+    setUserInput(e.target.innerText);
+  }
+
   // Function to submit the user's query
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,12 +46,38 @@ const App = () => {
   return (
     <div className="container">
       <h2 className="text-center my-4">Legal Chatbot</h2>
+      <div className="egPrompts">
+        <div className="row">
+          <div className="col d-flex text-center mt-2">
+            <div className="card prompt-card p-2" onClick={handlePromptClick}>
+              <p>A person promises to sell land and takes an advance payment but never delivers the land or refunds the money</p>
+            </div>
+          </div>
+          <div className="col d-flex text-center mt-2">
+            <div className="card prompt-card p-2" onClick={handlePromptClick}>
+              <p>A woman is subjected to physical and emotional abuse by her husband and in-laws for dowry</p>
+            </div>
+          </div>
+        </div>
+        <div className="row mb-4">
+          <div className="col d-flex text-center mt-2">
+            <div className="card prompt-card p-2" onClick={handlePromptClick}>
+              <p>A driver recklessly drives his car, causing an accident that results in the death of a pedestrian</p>
+            </div>
+          </div>
+          <div className="col d-flex text-center mt-2">
+            <div className="card prompt-card p-2" onClick={handlePromptClick}>
+              <p>A group of five people gathers with the intention of violently protesting outside a private company’s office</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         <textarea
           placeholder="Describe your legal scenario..."
           value={userInput}
           onChange={handleInputChange}
-          rows={4}
+          rows={4} id='textarea'
           className="textarea form-control p-2 rounded shadow-sm"
         ></textarea>
         <button
