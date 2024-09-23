@@ -14,7 +14,7 @@ CORS(app)
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
 # Load legal data
-df = pd.read_csv('ipc_sections_cleaned.csv')
+df = pd.read_csv('ipc_sections1.csv')
 legal_data = df.to_dict(orient='records')
 
 # Compute and normalize embeddings

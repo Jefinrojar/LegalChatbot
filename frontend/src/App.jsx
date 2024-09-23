@@ -40,34 +40,34 @@ const App = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Legal Chatbot</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="container">
+      <h2 className="text-center my-4">Legal Chatbot</h2>
+      <form onSubmit={handleSubmit}>
         <textarea
           placeholder="Describe your legal scenario..."
           value={userInput}
           onChange={handleInputChange}
           rows={4}
-          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="textarea form-control p-2 rounded shadow-sm"
         ></textarea>
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 px-4 font-semibold text-white rounded-md shadow-md ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+          className={`w-100 mt-3 py-2 px-4 btn btn-primary text-white rounded shadow-md ${loading ? 'bg-secondary disabled' : 'btn-primary'}`}
         >
           {loading ? 'Fetching...' : 'Submit'}
         </button>
       </form>
 
-      {error && <p className="mt-4 text-red-500">{error}</p>}
+      {error && <p className="mt-4 text-danger">{error}</p>}
 
       {response && (
-        <div className="mt-6 p-4 bg-white border border-gray-200 rounded-md shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800">Legal Response:</h3>
-          <p><strong className="font-medium text-gray-700">Title:</strong> {response.title}</p>
-          <p><strong className="font-medium text-gray-700">Section:</strong> {response.section}</p>
-          <p><strong className="font-medium text-gray-700">Details:</strong> {response.content}</p>
-          <p><strong className="font-medium text-gray-700">Punishment:</strong> {response.punishment}</p>
+        <div className="mt-3 p-4 bg-light border rounded shadow-sm">
+          <h3 className="h3 pb-2">Legal Response:</h3>
+          <p><strong className="h4">Title:</strong> {response.title}</p>
+          <p><strong className="h4">Section:</strong> {response.section}</p>
+          <p><strong className="h4">Details:</strong> {response.content}</p>
+          <p><strong className="h4">Punishment:</strong> {response.punishment}</p>
         </div>
       )}
     </div>
