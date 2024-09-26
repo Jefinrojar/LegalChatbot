@@ -105,7 +105,7 @@ const App = () => {
       {/* Chat Interface */}
       <div className="d-flex flex-column flex-grow-1" style={{ maxHeight: '100vh', overflowY: 'hidden' }}>
         <div className="chat-header bg-primary text-white text-center py-3">
-          <h2>Legal Chatbot</h2>
+          <h2>Copsify AI</h2>
         </div>
 
         {/* Show example prompts only if showPrompts is true */}

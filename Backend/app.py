@@ -5,7 +5,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
-from googletrans import Translator  # Import googletrans
+from googletrans import Translator
+import os
+import pickle
 
 app = Flask(__name__)
 CORS(app)
@@ -13,17 +15,34 @@ CORS(app)
 # Load the sentence transformer model
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
+# File paths
+DATA_PATH = 'ipc_sections1.csv'
+EMBEDDINGS_PATH = 'legal_embeddings.pkl'
+
 # Load the CSV data
-df = pd.read_csv('ipc_sections1.csv')
+df = pd.read_csv(DATA_PATH)
 legal_data = df.to_dict(orient='records')
 
-# Compute the embeddings for the legal document titles
-legal_embeddings = [
-    model.encode(str(doc['title'])) for doc in legal_data if isinstance(doc['title'], (str, bytes))
-]
-embeddings_matrix = normalize(np.array(legal_embeddings), axis=1)
+def load_or_create_embeddings():
+    """Load precomputed embeddings from disk or create them if they don't exist."""
+    if os.path.exists(EMBEDDINGS_PATH):
+        # Load cached embeddings
+        with open(EMBEDDINGS_PATH, 'rb') as f:
+            embeddings_matrix = pickle.load(f)
+    else:
+        # Compute embeddings in batches and normalize
+        print("Computing embeddings...")
+        legal_embeddings = model.encode([str(doc['title']) for doc in legal_data if isinstance(doc['title'], (str, bytes))], batch_size=16, convert_to_numpy=True)
+        embeddings_matrix = normalize(np.array(legal_embeddings), axis=1)
+        
+        # Save embeddings to file for future use
+        with open(EMBEDDINGS_PATH, 'wb') as f:
+            pickle.dump(embeddings_matrix, f)
+    
+    return embeddings_matrix
 
-# Initialize FAISS index for similarity search
+# Load or compute embeddings and initialize FAISS index
+embeddings_matrix = load_or_create_embeddings()
 index = faiss.IndexFlatIP(embeddings_matrix.shape[1])
 index.add(embeddings_matrix)
 
@@ -32,7 +51,7 @@ translator = Translator()
 
 def find_similar_documents(query, top_k=5):
     """Finds the top-k similar documents for a given query."""
-    query_embedding = model.encode([query])
+    query_embedding = model.encode([query], convert_to_numpy=True)
     query_embedding = normalize(np.array(query_embedding), axis=1)
     D, I = index.search(query_embedding, top_k)
     
