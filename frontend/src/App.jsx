@@ -105,7 +105,7 @@ const App = () => {
       {/* Chat Interface */}
       <div className="d-flex flex-column flex-grow-1" style={{ maxHeight: '100vh', overflowY: 'hidden' }}>
         <div className="chat-header bg-primary text-white text-center py-3">
-          <h2>Legal Chatbot</h2>
+          <h2>Copsify AI</h2>
         </div>
 
         {/* Show example prompts only if showPrompts is true */}
@@ -129,7 +129,7 @@ const App = () => {
         {/* Chat History */}
         <div ref={chatBoxRef} className="chat-box flex-grow-1 p-3" style={{ overflowY: 'auto', backgroundColor: '#f8f9fa' }}>
           {messages.map((message, index) => (
-            <div key={index} className={`d-flex mb-3 ${message.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
+            <div key={index} className={ `d-flex mb-3 ${message.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
               <div className={`p-3 rounded shadow-sm ${message.sender === 'user' ? 'bg-primary text-white' : 'bg-light text-dark'}`} style={{ maxWidth: '75%' }}>
                 <p className="mb-0"><strong>Title: </strong>{message.text}</p>
                 {message.sender === 'bot' && (
