@@ -8,6 +8,7 @@ from sklearn.preprocessing import normalize
 from googletrans import Translator
 import os
 import pickle
+from pymongo import MongoClient
 
 app = Flask(__name__)
 CORS(app)
@@ -15,13 +16,25 @@ CORS(app)
 # Load the sentence transformer model
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
-# File paths
-DATA_PATH = 'ipc_sections1.csv'
-EMBEDDINGS_PATH = 'legal_embeddings.pkl'
+# MongoDB configuration
+MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'
+  # Update with your MongoDB URI if hosted elsewhere
+DATABASE_NAME = 'chatbot'  # Name of your database
+COLLECTION_NAME = 'dataset'  # Name of your collection
 
-# Load the CSV data
-df = pd.read_csv(DATA_PATH)
-legal_data = df.to_dict(orient='records')
+# Initialize MongoDB client and access collection
+client = MongoClient(MONGO_URI)
+db = client[DATABASE_NAME]
+legal_collection = db[COLLECTION_NAME]
+
+EMBEDDINGS_PATH = 'legal_embeddings.pkl' 
+def load_legal_data_from_db():
+    """Fetch legal data from MongoDB."""
+    legal_data = list(legal_collection.find({}, {'_id': 0}))  # Retrieve all documents and exclude the '_id' field
+    return legal_data
+
+# Fetch legal data from the database
+legal_data = load_legal_data_from_db()
 
 def load_or_create_embeddings():
     """Load precomputed embeddings from disk or create them if they don't exist."""

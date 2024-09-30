@@ -4,3 +4,4 @@ faiss-cpu
 flask_cors
 sentence_transformers
 googletrans
+pymongo
