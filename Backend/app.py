@@ -20,7 +20,7 @@ model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'
   # Update with your MongoDB URI if hosted elsewhere
 DATABASE_NAME = 'chatbot'  # Name of your database
-COLLECTION_NAME = 'dataset'  # Name of your collection
+COLLECTION_NAME = 'datasets'  # Name of your collection
 
 # Initialize MongoDB client and access collection
 client = MongoClient(MONGO_URI)
