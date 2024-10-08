@@ -6,29 +6,28 @@ const App = () => {
   const [messages, setMessages] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showPrompts, setShowPrompts] = useState(true); // State to show/hide example cards
+  const [showPrompts, setShowPrompts] = useState(true); 
   const chatBoxRef = useRef(null); 
-  const recognitionRef = useRef(null); // Ref for speech recognition
+  const recognitionRef = useRef(null);
 
   const examplePrompts = [
-    "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடித்து பொதுமக்கள் பிடிபட்டனர். இந்த ஆள்மாறாட்டம் செய்ததற்காக IPC பிரிவு 140 இன் கீழ் தனிநபர் என்ன தண்டனையை எதிர்கொள்ளலாம்?",
-    "அண்டை நாட்டின் எல்லையில் கிளர்ச்சியாளர்களால் சட்டவிரோத சோதனையின் போது எடுக்கப்பட்ட திருடப்பட்ட பொருட்களை ஒரு நபர் தெரிந்தே வாங்குகிறார். ஐபிசி பிரிவு 127ன் படி, இந்தச் சொத்தைப் பெறுவதற்கு அவர் என்ன சட்டரீதியான விளைவுகளை சந்திக்க நேரிடும்?",
-    "ஒரு பொது ஊழியர் வேண்டுமென்றே தனது காவலில் இருக்கும் போர்க் கைதியை தடுப்புக் காவலில் இருந்து தப்பிக்க அனுமதிக்கிறார். IPC பிரிவு 128ன் கீழ் இந்த அரசு ஊழியர் எதிர்கொள்ளக்கூடிய அதிகபட்ச தண்டனை என்ன?",
-    "இந்திய அரசாங்கத்தின் மீது வெறுப்பையும் வெறுப்பையும் தூண்டும் வகையில் ஒரு தனிநபர் பொதுப் பேச்சுக்களை நிகழ்த்துவது கண்டறியப்பட்டுள்ளது. தேசத்துரோகத்தை தூண்ட முயற்சித்ததற்காக IPC பிரிவு 124A இன் கீழ் அவர்கள் என்ன தண்டனைகளை எதிர்கொள்ள முடியும்?"
+    "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடந்து பிடிபட்டனர். இந்த ஆள்மாறாட்டம் செய்ததற்காக IPC பிரிவு 140 இன் கீழ் என்ன தண்டனை?",
+    "அண்டை நாட்டின் எல்லையில் சட்டவிரோதமாக ஒரு நபர் திருடப்பட்ட சொத்துகளை வாங்குகிறார். IPC பிரிவு 127ன் படி என்ன விளைவுகள்?",
+    "ஒரு பொது ஊழியர் தப்பிக்க அனுமதிக்கிறார். IPC பிரிவு 128ன் கீழ் அவர் எதிர்கொள்ளக்கூடிய தண்டனை என்ன?",
+    "தேசத்துரோகத்தை தூண்ட முயற்சித்ததற்காக, IPC பிரிவு 124A இன் கீழ் என்ன தண்டனைகளை எதிர்கொள்ளலாம்?"
   ];
 
-  // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      recognition.lang = 'ta-IN'; // Set the language to Tamil, you can change it if needed
+      recognition.lang = 'ta-IN'; 
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setUserInput(transcript); // Set the recognized speech into the input field
+        setUserInput(transcript); 
       };
 
       recognition.onend = () => {
@@ -41,7 +40,6 @@ const App = () => {
     }
   }, []);
 
-  // Function to start voice recognition
   const handleVoiceInput = () => {
     if (recognitionRef.current) {
       recognitionRef.current.start();
@@ -64,7 +62,6 @@ const App = () => {
       return;
     }
 
-    // Hide the prompt cards after the first submit
     setShowPrompts(false); 
 
     const userMessage = { sender: 'user', text: userInput };
@@ -79,14 +76,15 @@ const App = () => {
         message: userMessage.text,
       });
 
-      const botMessage = {
+      const botMessages = result.data.map(doc => ({
         sender: 'bot',
-        text: result.data.content, 
-        title: result.data.title,
-        section: result.data.section,
-        punishment: result.data.punishment,
-      };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
+        text: doc.content,
+        title: doc.title,
+        section: doc.section,
+        punishment: doc.punishment,
+      }));
+
+      setMessages((prevMessages) => [...prevMessages, ...botMessages]);
     } catch (err) {
       setError('Error fetching data from the chatbot.');
     } finally {
@@ -102,13 +100,11 @@ const App = () => {
 
   return (
     <div className="container-fluid d-flex flex-column min-vh-100 p-0">
-      {/* Chat Interface */}
       <div className="d-flex flex-column flex-grow-1" style={{ maxHeight: '100vh', overflowY: 'hidden' }}>
         <div className="chat-header bg-primary text-white text-center py-3">
           <h2>Copsify AI</h2>
         </div>
 
-        {/* Show example prompts only if showPrompts is true */}
         {showPrompts && (
           <div className="bg-light p-3 text-center">
             <h5 className="mb-3">Try one of these examples:</h5>
@@ -126,7 +122,6 @@ const App = () => {
           </div>
         )}
 
-        {/* Chat History */}
         <div ref={chatBoxRef} className="chat-box flex-grow-1 p-3" style={{ overflowY: 'auto', backgroundColor: '#f8f9fa' }}>
           {messages.map((message, index) => (
             <div key={index} className={ `d-flex mb-3 ${message.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
@@ -144,7 +139,6 @@ const App = () => {
           ))}
         </div>
 
-        {/* Input Area */}
         <div className="chat-input bg-light p-3">
           <form onSubmit={handleSubmit} className="d-flex">
             <textarea
@@ -172,7 +166,6 @@ const App = () => {
           </form>
         </div>
 
-        {/* Error Message */}
         {error && <div className="text-danger text-center mt-2">{error}</div>}
       </div>
     </div>

@@ -62,7 +62,7 @@ index.add(embeddings_matrix)
 # Initialize the Googletrans Translator
 translator = Translator()
 
-def find_similar_documents(query, top_k=5):
+def find_similar_documents(query, top_k=2):
     """Finds the top-k similar documents for a given query."""
     query_embedding = model.encode([query], convert_to_numpy=True)
     query_embedding = normalize(np.array(query_embedding), axis=1)
@@ -70,34 +70,38 @@ def find_similar_documents(query, top_k=5):
     
     return I, D
 
+
 @app.route('/chat', methods=['POST'])
 def chat():
-    """Handles chat requests and returns the most relevant legal document."""
+    """Handles chat requests and returns the two most relevant legal documents."""
     user_query_tamil = request.json.get('message')
 
     # Translate Tamil input to English for processing
     user_query_english = translator.translate(user_query_tamil, dest='en').text
     
     # Find similar documents using the English query
-    I, D = find_similar_documents(user_query_english, top_k=5)
+    I, D = find_similar_documents(user_query_english, top_k=2)
     
-    # Retrieve the most relevant document
-    relevant_doc = legal_data[I[0][0]]
+    # Retrieve the two most relevant documents
+    relevant_docs = [legal_data[i] for i in I[0]]
 
-    # Translate the response fields to Tamil
-    translated_title = translator.translate(relevant_doc['title'], dest='ta').text
-    translated_section = translator.translate(relevant_doc['section'], dest='ta').text
-    translated_content = translator.translate(relevant_doc['content'], dest='ta').text
-    translated_punishment = translator.translate(relevant_doc.get('punishment', 'No punishment available'), dest='ta').text
-
-    response = {
-        "title": translated_title,
-        "section": translated_section,
-        "content": translated_content,
-        "punishment": translated_punishment
-    }
+    # Translate the response fields to Tamil for both documents
+    response = []
+    for doc in relevant_docs:
+        translated_title = translator.translate(doc['title'], dest='ta').text
+        translated_section = translator.translate(doc['section'], dest='ta').text
+        translated_content = translator.translate(doc['content'], dest='ta').text
+        translated_punishment = translator.translate(doc.get('punishment', 'No punishment available'), dest='ta').text
+        
+        response.append({
+            "title": translated_title,
+            "section": translated_section,
+            "content": translated_content,
+            "punishment": translated_punishment
+        })
 
     return jsonify(response)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
