@@ -63,3 +63,43 @@
   cursor: pointer;
   background-color: rgb(230, 230, 230);
 }
+.btn-copsify{
+  background: rgba(1, 33, 105, 0.79);
+  border-radius: 6px;
+}
+.btn-login-primary{
+  width: 50%;
+  border-radius: 5px;
+  border: none;
+  border: 1px solid #083087;
+  background-color: #083087;
+  color: white;
+}
+.border-login-primary{
+  border: 2px solid #083087;
+  border-radius: 10px;
+}
+.otp-container {
+  text-align: center;
+}
+
+.otp-input input {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  text-align: center;
+  margin: 0 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.otp-input input {
+  width: 60px;
+  height: 60px;
+}
+
+@media (max-width: 576px) {
+  .otp-input input {
+    width: 40px;
+    height: 40px;
+  }
+}
