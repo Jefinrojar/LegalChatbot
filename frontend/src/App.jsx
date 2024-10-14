@@ -14,7 +14,10 @@ const App = () => {
     <div>
       <Routes>
         <Route path='/' element={<Login/>}/>
+
+
         <Route path='/signup' element={<SignUp/>}/>
+
         <Route path='/chatinterface' element={<ChatInterface/>}/>
         <Route path='/forgotpassword' element={<ForgotPassword/>}/>
         <Route path='/otpverification' element={<OtpVerification/>}/>
