@@ -12,6 +12,12 @@ const ChatInterface = () => {
   const chatBoxRef = useRef(null);
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Function to toggle the dropdown
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
   
 
   const examplePrompts = [
@@ -113,6 +119,11 @@ const ChatInterface = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
   };
 
+  const logOut = () => {
+    sessionStorage.removeItem('token');
+    navigate('/');
+  }
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
@@ -128,22 +139,34 @@ const ChatInterface = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex flex-col w-full bg-white ">
+      <div className="flex flex-col w-full bg-white ">  
         {/* Chat Header */}
         <div className='flex items-center justify-between m-5 font-outfit'>
           <div className='flex items-center'>
             <img src={LawCharacter} alt="" width="60px" height="60px" className='border-1 rounded-full'/>
             <div className='ml-3'>
-              <p className='font-bold'>Copsify</p>
+              <p className='font-bold'>Copsify AI</p>
               <div className='flex items-center gap-2 mt-1'>
                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="#34A853" d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22" /></svg>
                 <p>Always active</p>
               </div>
             </div>
           </div>
-          <div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 24 24"><path fill="black" fill-rule="evenodd" d="M12 4a8 8 0 0 0-6.96 11.947A4.99 4.99 0 0 1 9 14h6a4.99 4.99 0 0 1 3.96 1.947A8 8 0 0 0 12 4m7.943 14.076q.188-.245.36-.502A9.96 9.96 0 0 0 22 12c0-5.523-4.477-10-10-10S2 6.477 2 12a9.96 9.96 0 0 0 2.057 6.076l-.005.018l.355.413A9.98 9.98 0 0 0 12 22q.324 0 .644-.02a9.95 9.95 0 0 0 5.031-1.745a10 10 0 0 0 1.918-1.728l.355-.413zM12 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" clip-rule="evenodd" /></svg>
-          </div>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* SVG icon */}
+      <div onClick={toggleDropdown} style={{ cursor: 'pointer' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 24 24">
+          <path fill="black" fillRule="evenodd" d="M12 4a8 8 0 0 0-6.96 11.947A4.99 4.99 0 0 1 9 14h6a4.99 4.99 0 0 1 3.96 1.947A8 8 0 0 0 12 4m7.943 14.076q.188-.245.36-.502A9.96 9.96 0 0 0 22 12c0-5.523-4.477-10-10-10S2 6.477 2 12a9.96 9.96 0 0 0 2.057 6.076l-.005.018l.355.413A9.98 9.98 0 0 0 12 22q.324 0 .644-.02a9.95 9.95 0 0 0 5.031-1.745a10 10 0 0 0 1.918-1.728l.355-.413zM12 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" clipRule="evenodd" />
+        </svg>
+      </div>
+
+      {/* Dropdown content */}
+      {isOpen && (
+       <div className="absolute top-14 right-0 bg-white shadow-lg p-2 px-3  rounded-md z-50" onClick={logOut}>
+       <p className="m-0 cursor-pointer">Logout</p>
+     </div>
+      )}
+    </div>
         </div>
 
 

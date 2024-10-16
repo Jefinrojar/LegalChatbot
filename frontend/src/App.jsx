@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Login  from './Pages/Login/Login.jsx';
 import ChatInterface from './Pages/ChatInterface/ChatInterface.jsx';
 import ForgotPassword from './Pages/ForgotPassword/ForgotPassword.jsx';
@@ -10,7 +10,7 @@ import './App.css';
 import './index.css';
 
 const App = () => {
- 
+
   return(
     <div>
       <Routes>
