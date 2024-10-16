@@ -126,20 +126,20 @@ const SignUp = () => {
             </div>
 
             <div className="text-sm">
-              <a href="#" className="text-primary hover:text-blue-500">Forgot Password?</a>
+              <a href="#" className="text-[#00357B] hover:text-blue-500">Forgot Password?</a>
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-primary text-white p-3 rounded-lg"
+            className="w-full bg-[#00357B] text-white p-3 rounded-lg"
           >
             Sign Up
           </button>
         </form>
 
         <p className="mt-4 text-sm text-center text-gray-600">
-          Already have an account?<Link to='/' className="text-primary">Sign In</Link>
+          Already have an account?<Link to='/' className="text-[#00357B]">Sign In</Link>
         </p>
       </div>
     </div>
