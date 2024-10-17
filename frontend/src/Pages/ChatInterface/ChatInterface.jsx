@@ -13,9 +13,9 @@ const ChatInterface = () => {
 
   const examplePrompts = [
     "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடந்து பிடிபட்டனர்.",
-      "அண்டை நாட்டின் எல்லையில் சட்டவிரோதமாக ஒரு நபர் திருடப்பட்ட சொத்துகளை வாங்குகிறார். IPC பிரிவு 127ன் படி என்ன விளைவுகள்?",
-      "ஒரு பொது ஊழியர் தப்பிக்க அனுமதிக்கிறார். IPC பிரிவு 128ன் கீழ் அவர் எதிர்கொள்ளக்கூடிய தண்டனை என்ன?",
-      "தேசத்துரோகத்தை தூண்ட முயற்சித்ததற்காக, IPC பிரிவு 124A இன் கீழ் என்ன தண்டனைகளை எதிர்கொள்ளலாம்?"
+    "அண்டை நாட்டின் எல்லையில் சட்டவிரோதமாக ஒரு நபர் திருடப்பட்ட சொத்துகளை வாங்குகிறார். IPC பிரிவு 127ன் படி என்ன விளைவுகள்?",
+    "ஒரு பொது ஊழியர் தப்பிக்க அனுமதிக்கிறார். IPC பிரிவு 128ன் கீழ் அவர் எதிர்கொள்ளக்கூடிய தண்டனை என்ன?",
+    "தேசத்துரோகத்தை தூண்ட முயற்சித்ததற்காக, IPC பிரிவு 124A இன் கீழ் என்ன தண்டனைகளை எதிர்கொள்ளலாம்?"
   ];
 
   useEffect(() => {
@@ -73,19 +73,24 @@ const ChatInterface = () => {
     setError(null);
 
     try {
+      // Send user input to Flask chat API
       const result = await axios.post('http://127.0.0.1:5000/chat', {
         message: userMessage.text,
       });
 
-      const botMessages = result.data.map(doc => ({
-        sender: 'bot',
-        text: doc.content,
-        title: doc.title,
-        section: doc.section,
-        punishment: doc.punishment,
-      }));
+      // Assuming Flask API returns a single document object
+      const botResponse = result.data;
 
-      setMessages((prevMessages) => [...prevMessages, ...botMessages]);
+      const botMessage = {
+        sender: 'bot',
+        text: botResponse.content,
+        title: botResponse.title,
+        section: botResponse.section,
+        punishment: botResponse.punishment,
+      };
+
+      // Add bot response to the chat
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (err) {
       setError('Error fetching data from the chatbot.');
     } finally {
@@ -122,7 +127,7 @@ const ChatInterface = () => {
         {/* Chat Header */}
         <div className='flex items-center justify-between m-5'>
           <div className='flex items-center'>
-            <img src={LawCharacter} alt="" width="60px" height="60px" className='border-1 rounded-full'/>
+            <img src={LawCharacter} alt="" width="60px" height="60px" className='border-1 rounded-full' />
             <div className='ml-3'>
               <p className='font-bold'>Copsify</p>
               <div className='flex items-center gap-2 mt-1'>
@@ -142,7 +147,7 @@ const ChatInterface = () => {
           <div>
             <div className="pl-10 pb-2 bg-white flex flex-col items-center">
               <h1 className="md:text-5xl text-2xl font-semibold text-gray-600">
-                Hello, <span className="text-pink-500">Ragavan</span>
+              <span className="text-gradient">Hello, Ragavan</span>
               </h1>
               <p className="text-gray-500 mt-2 md:text-5xl text-2xl">How can I help you today?</p>
             </div>
@@ -163,18 +168,41 @@ const ChatInterface = () => {
         )}
 
         {/* Messages */}
-        <div ref={chatBoxRef} className="flex-grow p-5 overflow-y-auto">
+        <div ref={chatBoxRef} className="flex-grow p-3 overflow-y-auto">
           {messages.map((message, index) => (
-            <div key={index} className={`mb-4 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-              <div className={`inline-block p-4 rounded-lg ${message.sender === 'user' ? 'bg-[#00357B] text-white' : 'bg-gray-100 text-gray-700'}`}>
-                <p>{message.text}</p>
+            <div
+              key={index}
+              className={`mb-4 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}
+            >
+              <div
+                className={`inline-block p-4 rounded-lg ${message.sender === 'user'
+                    ? 'bg-[#00357B] text-white'
+                    : ' text-gray-700 flex items-start'
+                  }`}
+              >
                 {message.sender === 'bot' && (
-                  <>
-                    <p className="mt-2 text-sm"><p className='font-bold'>Description:</p> {message.title}</p>
-                    <p className="mt-2 text-sm"><p className='font-bold'>Section:</p> {message.section}</p>
-                    <p className="text-sm"><p className='font-bold'>Punishment:</p> {message.punishment}</p>
-                  </>
+                  <img
+                    src={LawCharacter}
+                    alt=""
+                    className="w-10 h-10 rounded-full mr-3"
+                  />
                 )}
+                <div>
+                  <p>{message.text}</p>
+                  {message.sender === 'bot' && (
+                    <>
+                      <p className="mt-2 text-sm">
+                        <span className="font-bold">Description:</span> {message.title}
+                      </p>
+                      <p className="mt-2 text-sm">
+                        <span className="font-bold">Section:</span> {message.section}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-bold">Punishment:</span> {message.punishment}
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -202,7 +230,7 @@ const ChatInterface = () => {
               className="ml-3 "
               disabled={loading}
             >
-              {loading ? <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="#000000" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity="0.5"/><path fill="#000000" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate"/></path></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="#3A4DE2" d="M3 20v-6l8-2l-8-2V4l19 8z"/></svg>}
+              {loading ? <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="#000000" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity="0.5" /><path fill="#000000" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate" /></path></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="#3A4DE2" d="M3 20v-6l8-2l-8-2V4l19 8z" /></svg>}
             </button>
           </form>
         </div>
