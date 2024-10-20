@@ -27,9 +27,11 @@ const Login = () => {
                 email: email,
                 password: password
             });
+            const token = response.data.token;
+            sessionStorage.setItem('token', token);
             setSuccess('Login successful!');
             setError('');
-            navigate('/chatinterface');
+            navigate('/chatinterface');  
 
         } catch (error) {
             // Handle errors from the API response
@@ -86,20 +88,20 @@ const Login = () => {
                         </div>
 
                         <div className="text-sm">
-                            <a href="#" className="text-primary hover:text-blue-500">Forgot Password?</a>
+                            <a href="#" className="text-[#00357B] hover:text-blue-500">Forgot Password?</a>
                         </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full bg-primary text-white p-3 rounded-lg"
+                        className="w-full bg-[#00357B] text-white p-3 rounded-lg"
                     >
                         Sign In
                     </button>
                 </form>
 
                 <p className="mt-4 text-sm text-center text-gray-600">
-                    Don’t have an account? <Link to='/signup' className="text-primary">Sign Up</Link>
+                    Don’t have an account? <Link to='/signup' className="text-[#00357B]">Sign Up</Link>
                 </p>
             </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LawCharacter from "../../assets/images/LawCharacter.jpeg";
 const ChatInterface = () => {
@@ -10,6 +11,8 @@ const ChatInterface = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false); // Sidebar state
   const chatBoxRef = useRef(null);
   const recognitionRef = useRef(null);
+  const navigate = useNavigate();
+  
 
   const examplePrompts = [
     "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடந்து பிடிபட்டனர்.",
@@ -40,6 +43,13 @@ const ChatInterface = () => {
       console.error('Speech Recognition API not supported in this browser.');
     }
   }, []);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if(!token){
+      navigate('/');
+    }
+  },[navigate]);
 
   const handleVoiceInput = () => {
     if (recognitionRef.current) {
@@ -123,9 +133,9 @@ const ChatInterface = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex flex-col w-full bg-white">
+      <div className="flex flex-col w-full bg-white ">
         {/* Chat Header */}
-        <div className='flex items-center justify-between m-5'>
+        <div className='flex items-center justify-between m-5 font-outfit'>
           <div className='flex items-center'>
             <img src={LawCharacter} alt="" width="60px" height="60px" className='border-1 rounded-full' />
             <div className='ml-3'>
@@ -221,7 +231,7 @@ const ChatInterface = () => {
             <button
               type="button"
               onClick={handleVoiceInput}
-              className=" text-white p-3 rounded-full shadow-sm absolute right-20"
+              className=" text-white p-3 rounded-full absolute right-20"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path fill="#000000" d="M12 14q-1.25 0-2.125-.875T9 11V5q0-1.25.875-2.125T12 2t2.125.875T15 5v6q0 1.25-.875 2.125T12 14m-1 7v-3.075q-2.6-.35-4.3-2.325T5 11h2q0 2.075 1.463 3.538T12 16t3.538-1.463T17 11h2q0 2.625-1.7 4.6T13 17.925V21zm1-9q.425 0 .713-.288T13 11V5q0-.425-.288-.712T12 4t-.712.288T11 5v6q0 .425.288.713T12 12" /></svg>
             </button>
@@ -235,7 +245,7 @@ const ChatInterface = () => {
           </form>
         </div>
 
-        {error && <div className="text-red-500 text-center mt-2">{error}</div>}
+        {error && <div className="text-red-500 text-center mt-2">{error }</div>}
       </div>
     </div>
   );

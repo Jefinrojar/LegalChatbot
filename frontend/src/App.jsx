@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Login  from './Pages/Login/Login.jsx';
 import ChatInterface from './Pages/ChatInterface/ChatInterface.jsx';
 import ForgotPassword from './Pages/ForgotPassword/ForgotPassword.jsx';
@@ -10,14 +10,12 @@ import './App.css';
 import './index.css';
 
 const App = () => {
+ 
   return(
     <div>
       <Routes>
         <Route path='/' element={<Login/>}/>
-
-
         <Route path='/signup' element={<SignUp/>}/>
-
         <Route path='/chatinterface' element={<ChatInterface/>}/>
         <Route path='/forgotpassword' element={<ForgotPassword/>}/>
         <Route path='/otpverification' element={<OtpVerification/>}/>
