@@ -5,12 +5,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
-from googletrans import Translator
+from googletrans import Translator  # Using googletrans for synchronous translation
 import os
 import pickle
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
-
 
 app = Flask(__name__)
 CORS(app)
@@ -18,25 +17,30 @@ CORS(app)
 # Load the sentence transformer model
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
-# MongoDB configuration
-MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'
-  # Update with your MongoDB URI if hosted elsewhere
+# MongoDB configuration for user authentication
+MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'  # Update with your MongoDB URI
 DATABASE_NAME = 'chatbot'  # Name of your database
-COLLECTION_NAME = 'datasets'  # Name of your collection
+USERS_COLLECTION_NAME = 'users'  # Name of the users collection
 
-# Initialize MongoDB client and access collection
+# Initialize MongoDB client and access collection for user authentication
 client = MongoClient(MONGO_URI)
 db = client[DATABASE_NAME]
-legal_collection = db[COLLECTION_NAME]
+users_collection = db[USERS_COLLECTION_NAME]
 
-EMBEDDINGS_PATH = 'legal_embeddings.pkl' 
-def load_legal_data_from_db():
-    """Fetch legal data from MongoDB."""
-    legal_data = list(legal_collection.find({}, {'_id': 0}))  # Retrieve all documents and exclude the '_id' field
+# Path to the CSV file containing legal data
+CSV_PATH = 'ipc_sections.csv'
+
+# Load data from CSV
+def load_legal_data_from_csv():
+    """Load legal data from a CSV file."""
+    df = pd.read_csv(CSV_PATH)
+    legal_data = df.to_dict('records')  # Convert DataFrame to a list of dictionaries
     return legal_data
 
-# Fetch legal data from the database
-legal_data = load_legal_data_from_db()
+# Fetch legal data from the CSV file
+legal_data = load_legal_data_from_csv()
+
+EMBEDDINGS_PATH = 'legal_embeddings.pkl'
 
 def load_or_create_embeddings():
     """Load precomputed embeddings from disk or create them if they don't exist."""
@@ -47,7 +51,9 @@ def load_or_create_embeddings():
     else:
         # Compute embeddings in batches and normalize
         print("Computing embeddings...")
-        legal_embeddings = model.encode([str(doc['title']) for doc in legal_data if isinstance(doc['title'], (str, bytes))], batch_size=16, convert_to_numpy=True)
+        # Combine 'Section', 'Section Title', and 'Section Description' for embedding
+        combined_texts = [f"{doc['Section']} {doc['Section Title']} {doc['Section Description']}" for doc in legal_data]
+        legal_embeddings = model.encode(combined_texts, batch_size=16, convert_to_numpy=True)
         embeddings_matrix = normalize(np.array(legal_embeddings), axis=1)
         
         # Save embeddings to file for future use
@@ -61,10 +67,10 @@ embeddings_matrix = load_or_create_embeddings()
 index = faiss.IndexFlatIP(embeddings_matrix.shape[1])
 index.add(embeddings_matrix)
 
-# Initialize the Googletrans Translator
+# Initialize the googletrans Translator
 translator = Translator()
 
-def find_similar_documents(query, top_k=2):
+def find_similar_documents(query, top_k=5):
     """Finds the top-k similar documents for a given query."""
     query_embedding = model.encode([query], convert_to_numpy=True)
     query_embedding = normalize(np.array(query_embedding), axis=1)
@@ -73,8 +79,6 @@ def find_similar_documents(query, top_k=2):
     return I, D
 
 # Sign Up
-users_collection = db['users']
-
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -107,8 +111,7 @@ def signup():
 
     return jsonify({"message": "User created", "user_id": str(user_id)}), 201
 
-
-#Login 
+# Login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -127,38 +130,33 @@ def login():
     else:
         return jsonify({"error": "Invalid email or password"}), 400
 
-
+# Chat endpoint with synchronous translation
 @app.route('/chat', methods=['POST'])
 def chat():
-    """Handles chat requests and returns the two most relevant legal documents."""
+    """Handles chat requests and returns the most relevant legal document."""
     user_query_tamil = request.json.get('message')
 
     # Translate Tamil input to English for processing
     user_query_english = translator.translate(user_query_tamil, dest='en').text
     
     # Find similar documents using the English query
-    I, D = find_similar_documents(user_query_english, top_k=2)
+    I, D = find_similar_documents(user_query_english, top_k=5)
     
-    # Retrieve the two most relevant documents
-    relevant_docs = [legal_data[i] for i in I[0]]
+    # Retrieve the most relevant document
+    relevant_doc = legal_data[I[0][0]]
 
-    # Translate the response fields to Tamil for both documents
-    response = []
-    for doc in relevant_docs:
-        translated_title = translator.translate(doc['title'], dest='ta').text
-        translated_section = translator.translate(doc['section'], dest='ta').text
-        translated_content = translator.translate(doc['content'], dest='ta').text
-        translated_punishment = translator.translate(doc.get('punishment', 'No punishment available'), dest='ta').text
-        
-        response.append({
-            "title": translated_title,
-            "section": translated_section,
-            "content": translated_content,
-            "punishment": translated_punishment
-        })
+    # Translate the response fields to Tamil
+    translated_section = translator.translate(relevant_doc['Section'], dest='ta').text
+    translated_title = translator.translate(relevant_doc['Section Title'], dest='ta').text
+    translated_description = translator.translate(relevant_doc['Section Description'], dest='ta').text
+
+    response = {
+        "section": translated_section,
+        "section_title": translated_title,
+        "section_description": translated_description
+    }
 
     return jsonify(response)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
