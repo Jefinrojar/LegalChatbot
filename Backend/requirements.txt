@@ -5,3 +5,6 @@ flask_cors
 sentence_transformers
 googletrans
 pymongo
+scikit-learn
+matplotlib
+seaborn

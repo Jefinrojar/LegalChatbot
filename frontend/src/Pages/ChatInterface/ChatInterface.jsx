@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import LawCharacter from "../../assets/images/LawCharacter.jpeg";
+
 const ChatInterface = () => {
   const [userInput, setUserInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -12,7 +13,6 @@ const ChatInterface = () => {
   const chatBoxRef = useRef(null);
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
-  
 
   const examplePrompts = [
     "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடந்து பிடிபட்டனர்.",
@@ -46,10 +46,10 @@ const ChatInterface = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    if(!token){
+    if (!token) {
       navigate('/');
     }
-  },[navigate]);
+  }, [navigate]);
 
   const handleVoiceInput = () => {
     if (recognitionRef.current) {
@@ -88,15 +88,14 @@ const ChatInterface = () => {
         message: userMessage.text,
       });
 
-      // Assuming Flask API returns a single document object
+      // Assuming Flask API returns a response with section, section_title, and section_description
       const botResponse = result.data;
 
       const botMessage = {
         sender: 'bot',
-        text: botResponse.content,
-        title: botResponse.title,
-        section: botResponse.section,
-        punishment: botResponse.punishment,
+        text: botResponse.section_description, // Use section_description as the main text
+        title: botResponse.section_title,     // Use section_title as the title
+        section: botResponse.section,         // Use section as the section
       };
 
       // Add bot response to the chat
@@ -129,7 +128,6 @@ const ChatInterface = () => {
           <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 24 24" className='mt-5 border-2 bg-white border-gray-300 rounded-full p-2'><path fill="black" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z" /></svg>
           <svg xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 24 24" className='mt-[450px]'><g fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2" /><path d="M4.271 18.346S6.5 15.5 12 15.5s7.73 2.846 7.73 2.846M12 12a3 3 0 1 0 0-6a3 3 0 0 0 0 6" /></g></svg>
         </div>
-
       </div>
 
       {/* Main Chat Area */}
@@ -151,13 +149,12 @@ const ChatInterface = () => {
           </div>
         </div>
 
-
         {/* Prompts */}
         {showPrompts && (
           <div>
             <div className="pl-10 pb-2 bg-white flex flex-col items-center">
               <h1 className="md:text-5xl text-2xl font-semibold text-gray-600">
-              <span className="text-gradient">Hello, Ragavan</span>
+                <span className="text-gradient">Hello, Jefinrojar</span>
               </h1>
               <p className="text-gray-500 mt-2 md:text-5xl text-2xl">How can I help you today?</p>
             </div>
@@ -202,13 +199,10 @@ const ChatInterface = () => {
                   {message.sender === 'bot' && (
                     <>
                       <p className="mt-2 text-sm">
-                        <span className="font-bold">Description:</span> {message.title}
+                        <span className="font-bold">Title:</span> {message.title}
                       </p>
                       <p className="mt-2 text-sm">
                         <span className="font-bold">Section:</span> {message.section}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-bold">Punishment:</span> {message.punishment}
                       </p>
                     </>
                   )}
@@ -245,7 +239,7 @@ const ChatInterface = () => {
           </form>
         </div>
 
-        {error && <div className="text-red-500 text-center mt-2">{error }</div>}
+        {error && <div className="text-red-500 text-center mt-2">{error}</div>}
       </div>
     </div>
   );
