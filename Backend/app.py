@@ -10,7 +10,9 @@ import os
 import pickle
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
+import chardet
 
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
@@ -30,18 +32,58 @@ users_collection = db[USERS_COLLECTION_NAME]
 # Path to the CSV file containing legal data
 CSV_PATH = 'ipc_sections.csv'
 
-# Load data from CSV
+# Function to detect file encoding
+def detect_encoding(file_path):
+    """Detect the encoding of a file."""
+    with open(file_path, 'rb') as f:
+        result = chardet.detect(f.read())
+    return result['encoding']
+
+# Function to clean corrupted text
+def clean_text(text):
+    """Replace corrupted characters with their correct equivalents."""
+    replacements = {
+        'â€œ': '“',  # Left curly quote
+        'â€': '”',  # Right curly quote
+        'â€': '—',   # Em dash
+        # Add more replacements as needed
+    }
+    if isinstance(text, str):
+        for corrupted, correct in replacements.items():
+            text = text.replace(corrupted, correct)
+    return text
+
+# Function to load legal data from CSV
 def load_legal_data_from_csv():
     """Load legal data from a CSV file."""
-    df = pd.read_csv(CSV_PATH)
-    legal_data = df.to_dict('records')  # Convert DataFrame to a list of dictionaries
-    return legal_data
+    try:
+        # Read the file in binary mode and decode it manually
+        with open(CSV_PATH, 'rb') as f:
+            content = f.read().decode('utf-8', errors='replace')
+        
+        # Use pandas to read the cleaned content
+        from io import StringIO
+        df = pd.read_csv(StringIO(content))
+
+        # Clean corrupted characters in text columns
+        for column in df.columns:
+            if df[column].dtype == object:  # Check if the column contains text
+                df[column] = df[column].apply(clean_text)
+
+        # Handle null or missing data
+        df = df.fillna('')  # Replace null values with empty strings
+
+        legal_data = df.to_dict('records')  # Convert DataFrame to a list of dictionaries
+        return legal_data
+    except Exception as e:
+        raise ValueError(f"Unable to read the CSV file: {e}")
 
 # Fetch legal data from the CSV file
 legal_data = load_legal_data_from_csv()
-
+# Path to save or load embeddings
 EMBEDDINGS_PATH = 'legal_embeddings.pkl'
 
+# Function to load or create embeddings
 def load_or_create_embeddings():
     """Load precomputed embeddings from disk or create them if they don't exist."""
     if os.path.exists(EMBEDDINGS_PATH):
@@ -70,15 +112,15 @@ index.add(embeddings_matrix)
 # Initialize the googletrans Translator
 translator = Translator()
 
+# Function to find similar documents
 def find_similar_documents(query, top_k=5):
     """Finds the top-k similar documents for a given query."""
     query_embedding = model.encode([query], convert_to_numpy=True)
     query_embedding = normalize(np.array(query_embedding), axis=1)
     D, I = index.search(query_embedding, top_k)
-    
     return I, D
 
-# Sign Up
+# Sign Up endpoint
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -115,8 +157,12 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    email = data['email']
-    password = data['password']
+    email = data.get('email')  # Use .get() to avoid KeyError if key is missing
+    password = data.get('password')
+
+    # Check for required fields
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
 
     # Find the user in the MongoDB collection
     user = users_collection.find_one({"email": email})
@@ -126,7 +172,12 @@ def login():
 
     # Check if the password matches the stored hashed password
     if check_password_hash(user['password'], password):
-        return jsonify({"message": "Login successful", "user_id": str(user['_id'])}), 200
+        return jsonify({
+            "message": "Login successful",
+            "user_id": str(user['_id']),
+            "username": user['user_name'],  # Add username to the response
+            "email": user['email']
+        }), 200
     else:
         return jsonify({"error": "Invalid email or password"}), 400
 
@@ -136,27 +187,33 @@ def chat():
     """Handles chat requests and returns the most relevant legal document."""
     user_query_tamil = request.json.get('message')
 
-    # Translate Tamil input to English for processing
-    user_query_english = translator.translate(user_query_tamil, dest='en').text
-    
-    # Find similar documents using the English query
-    I, D = find_similar_documents(user_query_english, top_k=5)
-    
-    # Retrieve the most relevant document
-    relevant_doc = legal_data[I[0][0]]
+    try:
+        # Translate Tamil input to English for processing
+        user_query_english = translator.translate(user_query_tamil, dest='en').text
+        
+        # Find similar documents using the English query
+        I, D = find_similar_documents(user_query_english, top_k=5)
+        
+        # Retrieve the most relevant document
+        relevant_doc = legal_data[I[0][0]]
 
-    # Translate the response fields to Tamil
-    translated_section = translator.translate(relevant_doc['Section'], dest='ta').text
-    translated_title = translator.translate(relevant_doc['Section Title'], dest='ta').text
-    translated_description = translator.translate(relevant_doc['Section Description'], dest='ta').text
+        # Translate the response fields to Tamil
+        translated_section = translator.translate(relevant_doc['Section'], dest='ta').text
+        translated_title = translator.translate(relevant_doc['Section Title'], dest='ta').text
+        translated_description = translator.translate(relevant_doc['Section Description'], dest='ta').text
+        translated_punishments = translator.translate(relevant_doc['Punishments'], dest='ta').text
 
-    response = {
-        "section": translated_section,
-        "section_title": translated_title,
-        "section_description": translated_description
-    }
+        response = {
+            "section": translated_section,
+            "section_title": translated_title,
+            "section_description": translated_description,
+            "punishments": translated_punishments
+        }
 
-    return jsonify(response)
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+# Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True)
