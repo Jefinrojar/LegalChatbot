@@ -62,8 +62,8 @@ const SignUp = () => {
         />
       </div>
       {/* Right Section - Form */}
-      <div className="md:w-1/2 w-full bg-white flex flex-col justify-center items-center">
-        <h1 className="md:text-5xl text-3xl mb-6">Sign Up</h1>
+      <div className="md:w-1/2 w-full bg-white flex flex-col poppins-regular justify-center items-center">
+        <h1 className="md:text-5xl text-3xl poppins-semibold mb-6">Sign Up</h1>
 
         <form className="space-y-4 md:w-3/4 w-full" onSubmit={handleSubmit}>
           <div>
@@ -139,7 +139,7 @@ const SignUp = () => {
         </form>
 
         <p className="mt-4 text-sm text-center text-gray-600">
-          Already have an account?<Link to='/' className="text-[#00357B]">Sign In</Link>
+          Already have an account?<Link to='/' className="text-[#00357B]"> Sign In</Link>
         </p>
       </div>
     </div>

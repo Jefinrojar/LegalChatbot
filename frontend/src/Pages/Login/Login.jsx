@@ -16,7 +16,6 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form inputs
         if (!email || !password) {
             setError('Please fill in all fields.');
             return;
@@ -28,13 +27,19 @@ const Login = () => {
                 password: password
             });
             const token = response.data.token;
+            const { user_id, username, email: userEmail } = response.data; // Assuming your backend returns username
+            sessionStorage.setItem('user_id', user_id);
+            sessionStorage.setItem('username', username); // Store username in sessionStorage
+            sessionStorage.setItem('email', userEmail);
             sessionStorage.setItem('token', token);
+            
             setSuccess('Login successful!');
             setError('');
-            navigate('/chatinterface');  
+            
+            // Pass username as state to chatinterface
+            navigate('/chatinterface', { state: { username } });
 
         } catch (error) {
-            // Handle errors from the API response
             if (error.response && error.response.data) {
                 setError(error.response.data.error || 'Login failed.');
             } else {
@@ -47,9 +52,9 @@ const Login = () => {
         <div className="flex h-screen font-outfit">
             {/* Left Section - Form */}
             <div className="md:w-3/5 w-full bg-white flex flex-col justify-center items-center p-10">
-                <h1 className="md:text-5xl text-3xl mb-6">Welcome to Copsify</h1>
+                <h1 className="md:text-5xl text-3xl mb-6 poppins-medium">Welcome to Copsify</h1>
 
-                <form className="space-y-4 md:w-3/4 w-full" onSubmit={handleSubmit}>
+                <form className="space-y-4 md:w-3/4 w-full poppins-regular" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                         <input
@@ -100,7 +105,7 @@ const Login = () => {
                     </button>
                 </form>
 
-                <p className="mt-4 text-sm text-center text-gray-600">
+                <p className="mt-4 text-sm poppins-regular text-center text-gray-600">
                     Don’t have an account? <Link to='/signup' className="text-[#00357B]">Sign Up</Link>
                 </p>
             </div>
