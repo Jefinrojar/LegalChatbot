@@ -153,12 +153,16 @@ def signup():
 
     return jsonify({"message": "User created", "user_id": str(user_id)}), 201
 
-# Login endpoint
+# Login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    email = data['email']
-    password = data['password']
+    email = data.get('email')  # Use .get() to avoid KeyError if key is missing
+    password = data.get('password')
+
+    # Check for required fields
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
 
     # Find the user in the MongoDB collection
     user = users_collection.find_one({"email": email})
@@ -168,7 +172,12 @@ def login():
 
     # Check if the password matches the stored hashed password
     if check_password_hash(user['password'], password):
-        return jsonify({"message": "Login successful", "user_id": str(user['_id'])}), 200
+        return jsonify({
+            "message": "Login successful",
+            "user_id": str(user['_id']),
+            "username": user['user_name'],  # Add username to the response
+            "email": user['email']
+        }), 200
     else:
         return jsonify({"error": "Invalid email or password"}), 400
 
