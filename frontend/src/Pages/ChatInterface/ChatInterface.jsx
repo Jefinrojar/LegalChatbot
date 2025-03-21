@@ -15,10 +15,10 @@ const ChatInterface = () => {
   const navigate = useNavigate();
 
   const examplePrompts = [
-    "தடை செய்யப்பட்ட பகுதிகளுக்கு செல்வதற்காக பொது இடத்தில் ராணுவ சீருடை அணிந்து, ராணுவ வீரர் போல் நடந்து பிடிபட்டனர்.",
-    "அண்டை நாட்டின் எல்லையில் சட்டவிரோதமாக ஒரு நபர் திருடப்பட்ட சொத்துகளை வாங்குகிறார். IPC பிரிவு 127ன் படி என்ன விளைவுகள்?",
-    "ஒரு பொது ஊழியர் தப்பிக்க அனுமதிக்கிறார். IPC பிரிவு 128ன் கீழ் அவர் எதிர்கொள்ளக்கூடிய தண்டனை என்ன?",
-    "தேசத்துரோகத்தை தூண்ட முயற்சித்ததற்காக, IPC பிரிவு 124A இன் கீழ் என்ன தண்டனைகளை எதிர்கொள்ளலாம்?"
+    "ரமேஷ் ஒரு வாடிக்கையாளருக்கு ஒரு வலியுணர்வு மாத்திரையை ஆன்டிபயாட்டிக் மருந்தாகக் குறிப்பு செய்து விற்றார்.",
+    "ஒரு தொழிற்சாலை அதன் ரசாயனக் கழிவுகளை அருகிலுள்ள பொதுக்கிணற்றில் கலக்கி, அந்த நீரை குடிக்க முடியாததாக மாற்றியது.",
+    "ஒரு நபர் ஒரு பொதுவெளியில் பெரிதாக அசிங்கமான பாடல்களை பாடி, அருகிலுள்ள மக்களுக்கு தொந்தரவு ஏற்படுத்தினார்.",
+    "ஒரு ஓட்டுநர் ஒரு மக்கள் நெரிசலான சந்தையில் மிகுந்த வேகத்தில் வாகனம் ஓட்டி, பாதசாரிகளை அபாயத்தில் ஆழ்த்தினார்."
   ];
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const ChatInterface = () => {
         message: userMessage.text,
       });
 
-      // Assuming Flask API returns a response with section, section_title, and section_description
+      // Assuming Flask API returns a response with section, section_title, section_description, and punishments
       const botResponse = result.data;
 
       const botMessage = {
@@ -96,6 +96,7 @@ const ChatInterface = () => {
         text: botResponse.section_description, // Use section_description as the main text
         title: botResponse.section_title,     // Use section_title as the title
         section: botResponse.section,         // Use section as the section
+        punishments: botResponse.punishments, // Use punishments as the punishments
       };
 
       // Add bot response to the chat
@@ -203,6 +204,9 @@ const ChatInterface = () => {
                       </p>
                       <p className="mt-2 text-sm">
                         <span className="font-bold">Section:</span> {message.section}
+                      </p>
+                      <p className="mt-2 text-sm">
+                        <span className="font-bold">Punishments:</span> {message.punishments}
                       </p>
                     </>
                   )}
