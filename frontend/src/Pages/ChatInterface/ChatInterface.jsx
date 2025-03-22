@@ -146,7 +146,7 @@ const ChatInterface = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div
-        className={`transition-all duration-300 bg-gray-100 p-2 pt-5 flex flex-col  h-screen ${
+        className={`transition-all duration-300 bg-gray-100 p-2 pt-5 flex flex-col relative h-screen ${
           isSidebarExpanded ? "w-1/4" : "w-16"
         }`}
       >
@@ -185,7 +185,7 @@ const ChatInterface = () => {
             width="3em"
             height="3em"
             viewBox="0 0 24 24"
-            className="mt-[650px]"
+            className="absolute bottom-20"
           >
             <g
               fill="none"
