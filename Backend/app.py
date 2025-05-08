@@ -11,7 +11,7 @@ import pickle
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 import chardet
-
+from dotenv import load_dotenv
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -20,15 +20,17 @@ CORS(app)
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
 # MongoDB configuration for user authentication
-MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'  # Update with your MongoDB URI
-DATABASE_NAME = 'chatbot'  # Name of your database
-USERS_COLLECTION_NAME = 'users'  # Name of the users collection
+MONGO_URI = os.getenv('MONGO_URI')
+DATABASE_NAME = os.getenv('DATABASE_NAME')
+USERS_COLLECTION_NAME = os.getenv('USERS_COLLECTION_NAME')
 
 # Initialize MongoDB client and access collection for user authentication
 client = MongoClient(MONGO_URI)
 db = client[DATABASE_NAME]
 users_collection = db[USERS_COLLECTION_NAME]
 
+if not MONGO_URI or not DATABASE_NAME or not USERS_COLLECTION_NAME:
+    raise ValueError("Environment variables are not set properly.")
 # Path to the CSV file containing legal data
 CSV_PATH = 'ipc_sections.csv'
 
