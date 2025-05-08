@@ -1,10 +1,11 @@
-pandas
+flask
+flask-cors
+sentence-transformers
 numpy
 faiss-cpu
-flask_cors
-sentence_transformers
-googletrans
+pandas
+googletrans==4.0.0-rc1
+chardet
 pymongo
+werkzeug
 scikit-learn
-matplotlib
-seaborn
