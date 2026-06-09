@@ -1,11 +1,16 @@
+import os
 import pandas as pd
 from pymongo import MongoClient
+import dotenv
 
-MONGO_URI = 'mongodb://sanjay:Sanjay@ac-bciabyw-shard-00-00.v6nvgov.mongodb.net:27017,ac-bciabyw-shard-00-01.v6nvgov.mongodb.net:27017,ac-bciabyw-shard-00-02.v6nvgov.mongodb.net:27017/?ssl=true&replicaSet=atlas-z0falg-shard-0&authSource=admin&appName=Cluster0'  # paste your new URI
+dotenv.load_dotenv()
+MONGO_URI = os.getenv('MONGO_URI')
+DATABASE_NAME = os.getenv('DATABASE_NAME')
+COLLECTION_NAME = os.getenv('COLLECTION_NAME')
 
 client = MongoClient(MONGO_URI)
-db = client['chatbot']
-collection = db['datasets']
+db = client[DATABASE_NAME]
+collection = db[COLLECTION_NAME]
 
 # Clear existing empty documents if any
 collection.delete_many({})

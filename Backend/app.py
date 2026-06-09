@@ -10,6 +10,7 @@ import os
 import pickle
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
+import dotenv
 
 
 app = Flask(__name__)
@@ -19,10 +20,10 @@ CORS(app)
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
 # MongoDB configuration
-MONGO_URI = 'mongodb+srv://sanjay:Sanjay@cluster0.v6nvgov.mongodb.net/'
-  # Update with your MongoDB URI if hosted elsewhere
-DATABASE_NAME = 'chatbot'  # Name of your database
-COLLECTION_NAME = 'datasets'  # Name of your collection
+dotenv.load_dotenv()  # Load environment variables from .env file
+MONGO_URI = os.getenv('MONGO_URI')
+DATABASE_NAME = os.getenv('DATABASE_NAME')
+COLLECTION_NAME = os.getenv('COLLECTION_NAME')
 
 # Initialize MongoDB client and access collection
 client = MongoClient(MONGO_URI)
