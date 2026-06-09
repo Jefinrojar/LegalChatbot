@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 import os
 import pickle
 from pymongo import MongoClient
@@ -19,7 +19,7 @@ CORS(app)
 model = SentenceTransformer('sentence-transformers/paraphrase-mpnet-base-v2')
 
 # MongoDB configuration
-MONGO_URI = 'mongodb+srv://chatbot:chatbot123@cluster0.i1lqs.mongodb.net/'
+MONGO_URI = 'mongodb+srv://sanjay:Sanjay@cluster0.v6nvgov.mongodb.net/'
   # Update with your MongoDB URI if hosted elsewhere
 DATABASE_NAME = 'chatbot'  # Name of your database
 COLLECTION_NAME = 'datasets'  # Name of your collection
@@ -47,7 +47,11 @@ def load_or_create_embeddings():
     else:
         # Compute embeddings in batches and normalize
         print("Computing embeddings...")
-        legal_embeddings = model.encode([str(doc['title']) for doc in legal_data if isinstance(doc['title'], (str, bytes))], batch_size=16, convert_to_numpy=True)
+        legal_embeddings = model.encode([
+    f"{doc.get('section','')} {doc.get('title','')} {doc.get('content','')}"
+    for doc in legal_data
+    if isinstance(doc.get('title'), (str, bytes))
+])
         embeddings_matrix = normalize(np.array(legal_embeddings), axis=1)
         
         # Save embeddings to file for future use
@@ -61,8 +65,7 @@ embeddings_matrix = load_or_create_embeddings()
 index = faiss.IndexFlatIP(embeddings_matrix.shape[1])
 index.add(embeddings_matrix)
 
-# Initialize the Googletrans Translator
-translator = Translator()
+
 
 def find_similar_documents(query, top_k=2):
     """Finds the top-k similar documents for a given query."""
@@ -128,33 +131,25 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 400
 
 
+def safe_translate(text, max_chars=4500):
+    text = str(text)[:max_chars]  # truncate to safe length
+    return GoogleTranslator(source='en', target='ta').translate(text)
+
 @app.route('/chat', methods=['POST'])
 def chat():
-    """Handles chat requests and returns the two most relevant legal documents."""
     user_query_tamil = request.json.get('message')
-
-    # Translate Tamil input to English for processing
-    user_query_english = translator.translate(user_query_tamil, dest='en').text
+    user_query_english = GoogleTranslator(source='ta', target='en').translate(user_query_tamil)
     
-    # Find similar documents using the English query
     I, D = find_similar_documents(user_query_english, top_k=2)
-    
-    # Retrieve the two most relevant documents
     relevant_docs = [legal_data[i] for i in I[0]]
 
-    # Translate the response fields to Tamil for both documents
     response = []
     for doc in relevant_docs:
-        translated_title = translator.translate(doc['title'], dest='ta').text
-        translated_section = translator.translate(doc['section'], dest='ta').text
-        translated_content = translator.translate(doc['content'], dest='ta').text
-        translated_punishment = translator.translate(doc.get('punishment', 'No punishment available'), dest='ta').text
-        
         response.append({
-            "title": translated_title,
-            "section": translated_section,
-            "content": translated_content,
-            "punishment": translated_punishment
+            "title":      safe_translate(doc['title']),
+            "section":    safe_translate(doc['section']),
+            "content":    safe_translate(doc['content']),
+            "punishment": safe_translate(doc.get('punishment', 'No punishment available'))
         })
 
     return jsonify(response)
